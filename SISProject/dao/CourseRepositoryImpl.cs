@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using assignment_2.entity;
 using assignment_2.util;
+using assignment_2.exception;
 
 namespace assignment_2.dao
 {
@@ -17,19 +18,36 @@ namespace assignment_2.dao
 
         public void AddCourse(Course course)
         {
-            using (SqlConnection conn = DBConnUtil.GetConnection(connStr))
+            if (course.CourseName == null || course.CourseName == "" || course.CourseCode == null || course.CourseCode == "")
             {
-                conn.Open();
-                string query = "INSERT INTO Courses (course_name, course_code) VALUES (@CourseName, @CourseCode)";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@CourseName", course.CourseName);
-                cmd.Parameters.AddWithValue("@CourseCode", course.CourseCode);
-                cmd.ExecuteNonQuery();
+                throw new InvalidCourseDataException("Course name or course code cannot be empty.");
+            }
+
+            try
+            {
+                using (SqlConnection conn = DBConnUtil.GetConnection(connStr))
+                {
+                    conn.Open();
+                    string query = "INSERT INTO Courses (course_name, course_code) VALUES (@CourseName, @CourseCode)";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@CourseName", course.CourseName);
+                    cmd.Parameters.AddWithValue("@CourseCode", course.CourseCode);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidCourseDataException("Error while adding course: " + ex.Message);
             }
         }
 
         public void UpdateCourse(Course course)
         {
+            if (course.CourseName == null || course.CourseName == "" || course.CourseCode == null || course.CourseCode == "")
+            {
+                throw new InvalidCourseDataException("Course name or course code cannot be empty.");
+            }
+
             using (SqlConnection conn = DBConnUtil.GetConnection(connStr))
             {
                 conn.Open();
@@ -73,13 +91,17 @@ namespace assignment_2.dao
                         ""
                     );
                 }
+                else
+                {
+                    throw new CourseNotFoundException("Course not found with ID: " + courseId);
+                }
             }
-            return null;
         }
 
         public List<Course> GetAllCourses()
         {
             List<Course> courses = new List<Course>();
+
             using (SqlConnection conn = DBConnUtil.GetConnection(connStr))
             {
                 conn.Open();
@@ -89,14 +111,16 @@ namespace assignment_2.dao
 
                 while (reader.Read())
                 {
-                    courses.Add(new Course(
+                    Course course = new Course(
                         Convert.ToInt32(reader["course_id"]),
                         reader["course_name"].ToString(),
                         reader["course_code"].ToString(),
                         ""
-                    ));
+                    );
+                    courses.Add(course);
                 }
             }
+
             return courses;
         }
     }
