@@ -34,19 +34,18 @@ CREATE TABLE Payments (
     amount DECIMAL(10,2),
     payment_date DATE
 );
--- Sample Students
 INSERT INTO Students (first_name, last_name, date_of_birth, email, phone_number)
 VALUES
 ('John', 'Doe', '2001-05-12', 'john@example.com', '9999999999'),
 ('Jane', 'Smith', '2002-08-21', 'jane@example.com', '8888888888');
 
--- Sample Courses
+
 INSERT INTO Courses (course_name, course_code)
 VALUES
 ('Mathematics 101', 'MATH101'),
 ('Physics 101', 'PHY101');
 
--- Sample Teachers
+
 INSERT INTO Teacher (first_name, last_name, email)
 VALUES
 ('Robert', 'Brown', 'robert@uni.com'),
